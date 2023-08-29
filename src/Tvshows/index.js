@@ -18,7 +18,7 @@ function Tvshows() {
 
   return (
     <>
-      <Title>Tvshows</Title>
+      <Title align="center">Tvshows</Title>
       <Grid>
         {tvshows
           ? tvshows.map((tvshow) => {
