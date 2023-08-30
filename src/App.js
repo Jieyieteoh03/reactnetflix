@@ -1,29 +1,21 @@
-import { Container, Title, Space, Divider } from "@mantine/core";
-import Movies from "./Movies"; //only works for index.js
-import Tvshows from "./Tvshows";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./Home";
+import MoviesAdd from "./MoviesAdd";
+import MoviesEdit from "./MoviesEdit";
+import TvshowsAdd from "./TvshowsAdd";
+import TvshowsEdit from "./TvshowsEdit";
 
 function App() {
   return (
-    <Container>
-      <Space h="50px" />
-      <Title align="center" color="red">
-        Netflix
-      </Title>
-      <Space h="20px" />
-      <Title order={2} align="center">
-        Enjoy big movies, hit series and more from RM17.
-      </Title>
-      <Space h="30px" />
-      <Divider />
-      <Space h="30px" />
-      {/* list all the movies here */}
-      <Movies />
-      <Space h="30px" />
-      <Divider />
-      <Space h="30px" />
-      <Tvshows />
-      <Space h="30px" />
-    </Container>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/movies_add" element={<MoviesAdd />} />
+        <Route path="/movies/:id" element={<MoviesEdit />} />
+        <Route path="/tvshows_add" element={<TvshowsAdd />} />
+        <Route path="/tvshows/:id" element={<TvshowsEdit />} />
+      </Routes>
+    </Router>
   );
 }
 
