@@ -1,4 +1,4 @@
-import { Title, Grid, Card, Badge, Group, Space } from "@mantine/core";
+import { Title, Grid, Card, Badge, Group, Space, Button } from "@mantine/core";
 import axios from "axios";
 import { useState, useEffect } from "react";
 
@@ -15,11 +15,61 @@ function Movies() {
         console.log(error);
       });
   }, []);
+
+  const filterMovie = async (genre = "") => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/movie?genre=" + genre
+      );
+      setMovies(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <Title order={3} align="center">
         Movies
       </Title>
+      <Group>
+        <Button
+          onClick={() => {
+            filterMovie("");
+          }}
+        >
+          All
+        </Button>
+
+        <Button
+          onClick={() => {
+            filterMovie("Drama");
+          }}
+        >
+          Drama
+        </Button>
+        <Button
+          onClick={() => {
+            filterMovie("Fantasy");
+          }}
+        >
+          Fantasy
+        </Button>
+        <Button
+          onClick={() => {
+            filterMovie("Action");
+          }}
+        >
+          Action
+        </Button>
+        <Button
+          onClick={() => {
+            filterMovie("Sci-Fi");
+          }}
+        >
+          Sci-fi
+        </Button>
+      </Group>
+      <Space h="30px" />
       <Grid>
         {movies
           ? movies.map((movie) => {
