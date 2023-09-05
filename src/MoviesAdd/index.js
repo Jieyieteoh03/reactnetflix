@@ -13,6 +13,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import axios from "axios";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+
+const addMovie = async (data) => {
+  const response = await axios({
+    method: "POST",
+    url: "http://localhost:5000/movie",
+    headers: { "Content-Type": "application/json" },
+    data: data,
+  });
+  return response.data;
+};
 
 function MoviesAdd() {
   const navigate = useNavigate();
@@ -22,36 +33,69 @@ function MoviesAdd() {
   const [director, setDirector] = useState("");
   const [rating, setRating] = useState(1);
 
-  const handleAddNewMovie = async (event) => {
-    event.preventDefault();
-    // const response = await axios.post("http://localhost:5000/movie");
-    try {
-      const response = await axios({
-        method: "POST",
-        url: "http://localhost:5000/movie",
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify({
-          title: title,
-          director: director,
-          release_year: releaseYear,
-          genre: genre,
-          rating: rating,
-        }),
-      });
+  //create mutation
+  const createMutation = useMutation({
+    mutationFn: addMovie,
+    onSuccess: () => {
+      // when the movie is created
       // show add success message
       notifications.show({
         title: "Movie Added",
         color: "green",
       });
-      //redirect back to home page
+      // redirect back to home page
       navigate("/");
-    } catch (error) {
-      console.log(error);
+    },
+    onError: (error) => {
+      //when there is an error in API call
       notifications.show({
         title: error.response.data.message,
         color: "red",
       });
-    }
+    },
+  });
+
+  // console.log(queryClient.getQueryData(["movies", ""]));
+
+  const handleAddNewMovie = async (event) => {
+    event.preventDefault();
+    createMutation.mutate(
+      JSON.stringify({
+        title: title,
+        director: director,
+        release_year: releaseYear,
+        genre: genre,
+        rating: rating,
+      })
+    );
+    // const response = await axios.post("http://localhost:5000/movie");
+    // try {
+    //   const response = await axios({
+    //     method: "POST",
+    //     url: "http://localhost:5000/movie",
+    //     headers: { "Content-Type": "application/json" },
+    //     data: JSON.stringify({
+    //       title: title,
+    //       director: director,
+    //       release_year: releaseYear,
+    //       genre: genre,
+    //       rating: rating,
+    //     }),
+    //   });
+    //   // show add success message
+    //   notifications.show({
+    //     title: "Movie Added",
+    //     color: "green",
+    //   });
+    //   //redirect back to home page
+    //   navigate("/");
+    // } catch (error) {
+    //   console.log(error);
+    //   notifications.show({
+    //     title: error.response.data.message,
+    //     color: "red",
+    //   });
+    // }
   };
 
   return (

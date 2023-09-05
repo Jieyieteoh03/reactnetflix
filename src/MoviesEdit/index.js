@@ -13,6 +13,22 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useQuery, useMutation } from "@tanstack/react-query";
+
+const getMovie = async (id) => {
+  const response = await axios.get("http://localhost:5000/movie/" + id);
+  return response.data;
+};
+
+const updateMovie = async ({ id, data }) => {
+  const response = await axios({
+    method: "PUT",
+    url: "http://localhost:5000/movie/" + id,
+    headers: { "Content-Type": "application/json" },
+    data: data,
+  });
+  return response.data;
+};
 
 function MoviesEdit() {
   const { id } = useParams();
@@ -22,55 +38,94 @@ function MoviesEdit() {
   const [genre, setGenre] = useState("");
   const [director, setDirector] = useState("");
   const [rating, setRating] = useState(1);
+  const { data } = useQuery({
+    queryKey: ["movie", id],
+    queryFn: () => getMovie(id),
+    onSuccess: (data) => {
+      setTitle(data.title);
+      setDirector(data.director);
+      setReleaseYear(data.release_year);
+      setGenre(data.genre);
+      setRating(data.rating);
+    },
+  });
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/movie/" + id)
-      .then((response) => {
-        setTitle(response.data.title);
-        setDirector(response.data.director);
-        setGenre(response.data.genre);
-        setReleaseYear(response.data.release_year);
-        setRating(response.data.rating);
-      })
-      .catch((error) => {
-        notifications.show({
-          title: error.response.data.message,
-          color: "red",
-        });
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get("http://localhost:5000/movie/" + id)
+  //     .then((response) => {
+  //       setTitle(response.data.title);
+  //       setDirector(response.data.director);
+  //       setGenre(response.data.genre);
+  //       setReleaseYear(response.data.release_year);
+  //       setRating(response.data.rating);
+  //     })
+  //     .catch((error) => {
+  //       notifications.show({
+  //         title: error.response.data.message,
+  //         color: "red",
+  //       });
+  //     });
+  // }, []);
 
-  const handleUpdateMovie = async (event) => {
-    event.preventDefault();
-    // const response = await axios.post("http://localhost:5000/movie");
-    try {
-      const response = await axios({
-        method: "PUT",
-        url: "http://localhost:5000/movie/" + id,
-        headers: { "Content-Type": "application/json" },
-        data: JSON.stringify({
-          title: title,
-          director: director,
-          release_year: releaseYear,
-          genre: genre,
-          rating: rating,
-        }),
-      });
-      // show add success message
+  const updateMutation = useMutation({
+    mutationFn: updateMovie,
+    onSuccess: () => {
       notifications.show({
         title: "Movie Edited",
         color: "green",
       });
       //redirect back to home page
       navigate("/");
-    } catch (error) {
-      console.log(error);
+    },
+    onError: (error) => {
       notifications.show({
         title: error.response.data.message,
         color: "red",
       });
-    }
+    },
+  });
+
+  const handleUpdateMovie = async (event) => {
+    event.preventDefault();
+    updateMutation.mutate({
+      id: id,
+      data: JSON.stringify({
+        title: title,
+        director: director,
+        release_year: releaseYear,
+        genre: genre,
+        rating: rating,
+      }),
+    });
+    // const response = await axios.post("http://localhost:5000/movie");
+    // try {
+    //   const response = await axios({
+    //     method: "PUT",
+    //     url: "http://localhost:5000/movie/" + id,
+    //     headers: { "Content-Type": "application/json" },
+    //     data: JSON.stringify({
+    //       title: title,
+    //       director: director,
+    //       release_year: releaseYear,
+    //       genre: genre,
+    //       rating: rating,
+    //     }),
+    //   });
+    //   // show add success message
+    //   notifications.show({
+    //     title: "Movie Edited",
+    //     color: "green",
+    //   });
+    //   //redirect back to home page
+    //   navigate("/");
+    // } catch (error) {
+    //   console.log(error);
+    //   notifications.show({
+    //     title: error.response.data.message,
+    //     color: "red",
+    //   });
+    // }
   };
 
   return (
